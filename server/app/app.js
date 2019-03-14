@@ -57,7 +57,9 @@ passport.use(new GoogleStrategy({
 
 // The root is "read" for CRUD
 app.get('/', function(req, res) {
-    res.send('hello world')
+    writeHeader(res);    
+    res.write('<a href="/auth/google">google</a>')
+    writeFooter(res);
 });
 
 // Create (from CRUD)
@@ -83,3 +85,15 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback', passport.authenticate('google',  { successRedirect: '/tab2',
                                                                     failureRedirect: '/tab1'}));
+
+// Helper functions for printing common HTML
+
+function writeHeader(res) {
+    res.write('<html><body>');
+    res.write('<h1>Picture Gallery</h1>');
+}
+
+function writeFooter(res) {
+    res.write("<p><a href='/'>Home</a></p>")
+    res.end();
+}
