@@ -68,7 +68,21 @@ app.get('/create', function(req, res) {
 });
 
 // This is also Create (from CRUD)
-app.post('/create', function(req, res) {
+app.post('/addImg', function(req, res) {
+    const userID = '';
+    const long = '';
+    const lat = '';
+    const image = req.files.image;
+    
+    // Save the new picture in the DB
+    const doc = {"userID": userID, "long": long, "lat": lat, "image": image };
+
+    collection.insertOne(doc, function(err) {        
+        if (err) console.log(err);
+        image.mv('public/images/' + doc._id, function(err) {
+            if (err) console.log(err);
+        });        
+    });
 
 });
 
