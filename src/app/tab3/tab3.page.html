@@ -1,9 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Tab Three
+     Camera
     </ion-title>
   </ion-toolbar>
 </ion-header>
-
-<ion-content></ion-content>
+<ion-content>
+	<img [src]="this.image" *ngIf="this.image"/>
+	<ion-button (click)="takePhoto()">Take pic</ion-button>
+</ion-content>
