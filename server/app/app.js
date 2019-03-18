@@ -35,7 +35,8 @@ mongodb.MongoClient.connect(url, opt, function(err, client) {
   const db = client.db(db_nameUsr);
   
   // Save the collection in the global var
-  collection = db.collection(collection_nameUsr);
+  collectionUsr = db.collection(collection_nameUsr);
+  collectionImg = db.collection(collection_nameImg);
 
   // Start the application after the database connection is ready
   app.listen(3000);
@@ -67,17 +68,18 @@ app.get('/create', function(req, res) {
 
 });
 
-// This is also Create (from CRUD)
+// Add image to DB
 app.post('/addImg', function(req, res) {
     const userID = '';
     const long = '';
     const lat = '';
+    //const likes_count = null
     const image = req.files.image;
     
     // Save the new picture in the DB
-    const doc = {"userID": userID, "long": long, "lat": lat, "image": image };
+    const doc = {"_id": userID, "long": long, "lat": lat, "likes_count": likes_count, "image": image };
 
-    collection.insertOne(doc, function(err) {        
+    collectionImg.insertOne(doc, function(err) {        
         if (err) console.log(err);
         image.mv('public/images/' + doc._id, function(err) {
             if (err) console.log(err);
