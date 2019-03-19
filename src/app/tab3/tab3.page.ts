@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { Plugins, CameraResultType, CameraSource } from '@capacitor/core';
-
-const { Camera } = Plugins;
+import { ImageserviceService } from '../services/imageservice.service';
 
 @Component({
   selector: 'app-tab3',
@@ -10,19 +8,22 @@ const { Camera } = Plugins;
 })
 
 export class Tab3Page {
-	image: any;
-	savedImgs: any = [];
-	
-	constructor() {}
-//Using the camera to take a photo
-	async takePhoto(){
-			const result = await Camera.getPhoto({
-			quality: 90,
-			resultType: CameraResultType.Base64,
-			source: CameraSource.Camera
-	});
-	this.image = result.base64Data;
-	}
+  savedImgs: any = [];
+  constructor(public imageService: ImageserviceService){}
 
+//loading images in the gallery from the image service
+  loadImages() {
+      this.imageService.getImages().then(result => {
+          if (result) {
+              this.savedImgs = result;
+              for (let i = 0; i < this.savedImgs.length; i++) {
+                console.log(this.savedImgs[i]);
+              }
 
-}
+          }
+      });
+  }
+    ngOnInit() {
+       this.loadImages();
+    }
+  }
