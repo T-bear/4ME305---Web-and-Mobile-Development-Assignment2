@@ -16,7 +16,7 @@ export class Tab2Page {
   
   }
 
-  ngOnInit(){
+  ngOnInit(){ 
     this.map.getLocation().subscribe(data => {
       console.log(data);
       this.lat = data.latitude;
