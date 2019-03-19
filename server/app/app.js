@@ -5,6 +5,16 @@ const io = require('socket.io')();
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://localhost:27017/lastAssignment";
 
+const mc = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'lastAssignment'
+});
+ 
+// connect to database
+mc.connect();
+
 MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     io.on('connection', function(socket){
@@ -77,3 +87,10 @@ MongoClient.connect(url, function(err, db) {
         });
     });
   app.get('/delete/:id', function(req, res) { });
+
+  app.get('/test_sessions', function (req, res) {
+    mc.query('SELECT * FROM lastAssignment', function (error, results, fields) {
+        if (error) throw error;
+        return res.send({ error: false, data: results, message: 'Test_Session' });
+    });
+});
