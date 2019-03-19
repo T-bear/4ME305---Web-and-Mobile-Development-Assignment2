@@ -1,115 +1,79 @@
 const express = require('express');
-const mongodb = require('mongodb');
 const fileUpload = require('express-fileupload');
-const passport = require('passport');
-
 const app = express();
+const io = require('socket.io')();
+var MongoClient = require('mongodb').MongoClient;
+var url = "mongodb://localhost:27017/lastAssignment";
 
-// Extend the basic Express features
-app.use(express.static('public'));
-// use 'extended' to avoid deprecation warning
-app.use(express.urlencoded({extended: true}));
-app.use(fileUpload({useTempFiles: true}));
-// Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Static DB settings
-const url = "mongodb://localhost:27017";
-const db_nameImg = "Userimage";
-const collection_nameImg = "images";
-const db_nameUsr = "User";
-const collection_nameUsr = "users"
-// avoid deprecation warning
-const opt = {useNewUrlParser: true};
-
-var GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-// This will hold the collection as a global, for use in the whole app
-var collection;
-
-// Initialize connection once
-mongodb.MongoClient.connect(url, opt, function(err, client) {
-  if(err) throw err;
-
-  const db = client.db(db_nameUsr);
-  
-  // Save the collection in the global var
-  collectionUsr = db.collection(collection_nameUsr);
-  collectionImg = db.collection(collection_nameImg);
-
-  // Start the application after the database connection is ready
-  app.listen(3000);
-  console.log("Listening on port 3000");
-});
-
-//Google strategy
-passport.use(new GoogleStrategy({
-    clientID: '604880648774-4qbuienc8391qcjktj78qkpnrqjt16pr.apps.googleusercontent.com',
-    clientSecret: 'KvcJyJ4FVI4k3virSrtU5pMD',
-    callbackURL: 'http://localhost:8100/auth/google/callback'
-},
-    function (accessToken, refreshToken, profile, done) {
-        queryDatabase("INSERT IGNORE INTO user (email, Role_IDrole, Organization) VALUES ('" + profile.emails[0].value + "', 2, 1)");
-        return done(null, profile);
-       //});
-    }
-));
-
-// The root is "read" for CRUD
-app.get('/', function(req, res) {
-    writeHeader(res);    
-    res.write('<a href="/auth/google">google</a>')
-    writeFooter(res);
-});
-
-// Create (from CRUD)
-app.get('/create', function(req, res) {
-
-});
-
-// Add image to DB
-app.post('/addImg', function(req, res) {
-    const userID = '';
-    const long = '';
-    const lat = '';
-    //const likes_count = null
-    const image = req.files.image;
-    
-    // Save the new picture in the DB
-    const doc = {"_id": userID, "long": long, "lat": lat, "likes_count": likes_count, "image": image };
-
-    collectionImg.insertOne(doc, function(err) {        
-        if (err) console.log(err);
-        image.mv('public/images/' + doc._id, function(err) {
-            if (err) console.log(err);
-        });        
+MongoClient.connect(url, function(err, db) {
+    if (err) throw err;
+    io.on('connection', function(socket){
+        socket.on('login', function(res){
+            // const collection = client.db("lastAssig").collection("users");
+            console.log(res.email);
+            var dbo = db.db("lastAssignment");
+            var user = { email: res.email };
+            dbo.collection("users").insertOne(user, function(err, res) {
+                if (err) throw err;
+                console.log(res.email + 'added to the database');
+                db.close();
+            });   
+        });
     });
-
 });
+/*  
+    const MongoClient = require('mongodb').MongoClient;
+    const uri = "mongodb+srv://Finlirare:student@cluster0-a8qtl.mongodb.net/Cluster0?retryWrites=true";
+    const client = new MongoClient(uri, { useNewUrlParser: true });
+    var db;
 
-app.get('/delete/:id', function(req, res) {
+    client.connect(function(err, client) {
+      if (err) {
+        throw err;
+      } else {
+        io.on('connection', function(socket){
+          const collection = client.db("Cluster0").collection("users");
+          socket.on('login', function(res){
+              collection.insertOne({
+                  email: res.email,
+              });
+          });
+        });
+      }
+      client.close();
+    });
+*/
 
-});
+// perform actions on the collection object  
+  io.listen(3001);
+  app.listen(3000, function(){
+      console.log("Listening on port 3000");
+  });
 
-//Authenticating Google login
-app.get('/auth/google',
-  passport.authenticate('google', {
-    scope: ['https://www.googleapis.com/auth/plus.login',
-            'email'] 
-}));
-
-app.get('/auth/google/callback', passport.authenticate('google',  { successRedirect: '/tab2',
-                                                                    failureRedirect: '/tab1'}));
-
-// Helper functions for printing common HTML
-
-function writeHeader(res) {
-    res.write('<html><body>');
-    res.write('<h1>Picture Gallery</h1>');
-}
-
-function writeFooter(res) {
-    res.write("<p><a href='/'>Home</a></p>")
-    res.end();
-}
+//EXPRESS
+    // Extend the basic Express features
+    app.use(express.static('../../src'));
+    // use 'extended' to avoid deprecation warning
+    app.use(express.urlencoded({extended: true}));
+    app.use(fileUpload({useTempFiles: true}));
+    app.get('*', function (req, res) { });
+    // The root is "read" for CRUD
+    app.get('/tabs/tab1', function(req, res, next) { });
+    // Create (from CRUD)
+    app.get('/create', function(req, res) { });
+    // This is also Create (from CRUD)
+    app.post('/addImg', function(req, res) {
+        const userID = '';
+        const long = '';
+        const lat = '';
+        const image = req.files.image;
+        // Save the new picture in the DB
+        const doc = {"userID": userID, "long": long, "lat": lat, "image": image };
+        collection.insertOne(doc, function(err) {        
+            if (err) console.log(err);
+            image.mv('public/images/' + doc._id, function(err) {
+                if (err) console.log(err);
+            });        
+        });
+    });
+  app.get('/delete/:id', function(req, res) { });
