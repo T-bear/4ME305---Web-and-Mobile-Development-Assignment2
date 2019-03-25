@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { ImageserviceService } from '../services/imageservice.service';
+import { Plugins, CameraResultType, CameraSource } from '@capacitor/core';
+import io from 'socket.io-client';
+const socket = io('http://localhost:3001');
+const { Camera } = Plugins;
 
 @Component({
   selector: 'app-tab3',
@@ -8,22 +11,29 @@ import { ImageserviceService } from '../services/imageservice.service';
 })
 
 export class Tab3Page {
-  savedImgs: any = [];
-  constructor(public imageService: ImageserviceService){}
+	image: string;
+	savedImg: string;
+	userId: any;
+	constructor() {}
 
-//loading images in the gallery from the image service
-  loadImages() {
-      this.imageService.getImages().then(result => {
-          if (result) {
-              this.savedImgs = result;
-              for (let i = 0; i < this.savedImgs.length; i++) {
-                console.log(this.savedImgs[i]);
-              }
+//Using capacitor to take a photo
+	async takePhoto(){
+		const result = await Camera.getPhoto({
+			quality: 90,
+			resultType: CameraResultType.Base64,
+			source: CameraSource.Camera
+		});
+		this.image = result.base64Data;
+	}
 
-          }
-      });
-  }
-    ngOnInit() {
-       this.loadImages();
-    }
-  }
+
+	saveImage(){
+		this.savedImg = this.image;
+		const img = {id: 'id', location: 'loc', image: this.savedImg}
+		console.log(this.savedImg);
+		socket.emit('image', img);	
+	}
+	ngOnInit() {
+		this.takePhoto();		
+	}
+}

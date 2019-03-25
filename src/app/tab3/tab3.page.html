@@ -1,20 +1,12 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Image gallery
+     Camera
     </ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
-   <ion-grid>
-        <ion-row>
-          <ion-col *ngFor="let img of savedImgs" size="6">
-                <img [src]="img.image" />
-                <p>{{img.latitude}},{{img.longitude}}</p>
-                <p>{{img.time | date:'medium'}}</p>
-                <p>{{img.note}}</p> 
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+  <img [src]="this.image" *ngIf="this.image"/>
+  <ion-button (click)="saveImage()">Save image</ion-button>
+	<ion-button (click)="takePhoto()">New photo</ion-button>
 </ion-content>
